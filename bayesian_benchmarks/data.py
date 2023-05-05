@@ -175,7 +175,7 @@ class Kin8nm(Dataset):
         X_raw, Y_raw = data[..., :-1], data[..., -1].reshape(-1, 1)
         assert X_raw.shape == (self.N, self.D)
         assert Y_raw.shape == (self.N, 1)
-        return X_raw.astype(np.float), Y_raw.astype(np.float)
+        return X_raw.astype(float), Y_raw.astype(float)
 
 
 @add_regression
