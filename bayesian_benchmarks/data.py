@@ -20,7 +20,7 @@ from datetime import datetime
 from scipy.io import loadmat
 import pickle
 import shutil
-
+import warnings
 from urllib.request import urlopen
 logging.getLogger().setLevel(logging.INFO)
 import zipfile
@@ -45,9 +45,12 @@ def normalize(X):
 
 
 class Dataset(object):
-    def __init__(self, split=0, prop=0.9):
+    def __init__(self, split=0, prop=0.9, dataset_path=DATA_PATH):
+
+        self.dataset_path = dataset_path
 
         if self.needs_download:
+            warnings.warn(f"File not found in {self.datapath}, attempting to download")
             self.download()
 
         X_raw, Y_raw = self.read_data()
@@ -68,7 +71,7 @@ class Dataset(object):
 
     @property
     def datadir(self):
-        dir = os.path.join(DATA_PATH, self.name)
+        dir = os.path.join(self.dataset_path, self.name)
         if not os.path.isdir(dir):
             os.mkdir(dir)
         return dir
@@ -255,7 +258,7 @@ class Classification(Dataset):
 
     @property
     def needs_download(self):
-        if os.path.isfile(os.path.join(DATA_PATH, 'classification_data', 'iris', 'iris_R.dat')):
+        if os.path.isfile(os.path.join(self.dataset_path, 'classification_data', 'iris', 'iris_R.dat')):
             return False
         else:
             return True
@@ -263,7 +266,7 @@ class Classification(Dataset):
     def download(self):
         logging.info('donwloading classification data. WARNING: downloading 195MB file'.format(self.name))
 
-        filename = os.path.join(DATA_PATH, 'classification_data.tar.gz')
+        filename = os.path.join(self.dataset_path, 'classification_data.tar.gz')
 
         url = 'http://persoal.citius.usc.es/manuel.fernandez.delgado/papers/jmlr/data.tar.gz'
         with urlopen(url) as response, open(filename, 'wb') as out_file:
@@ -272,21 +275,21 @@ class Classification(Dataset):
 
         import tarfile
         tar = tarfile.open(filename)
-        tar.extractall(path=os.path.join(DATA_PATH, 'classification_data'))
+        tar.extractall(path=os.path.join(self.dataset_path, 'classification_data'))
         tar.close()
 
         logging.info('finished donwloading {} data'.format(self.name))
 
 
     def read_data(self):
-        datapath = os.path.join(DATA_PATH, 'classification_data', self.name, self.name + '_R.dat')
+        datapath = os.path.join(self.dataset_path, 'classification_data', self.name, self.name + '_R.dat')
         if os.path.isfile(datapath):
             data = np.array(pandas.read_csv(datapath, header=0, delimiter='\t').values).astype(float)
         else:
-            data_path1 = os.path.join(DATA_PATH, 'classification_data', self.name, self.name + '_train_R.dat')
+            data_path1 = os.path.join(self.dataset_path, 'classification_data', self.name, self.name + '_train_R.dat')
             data1 = np.array(pandas.read_csv(data_path1, header=0, delimiter='\t').values).astype(float)
 
-            data_path2 = os.path.join(DATA_PATH, 'classification_data', self.name, self.name + '_test_R.dat')
+            data_path2 = os.path.join(self.dataset_path, 'classification_data', self.name, self.name + '_test_R.dat')
             data2 = np.array(pandas.read_csv(data_path2, header=0, delimiter='\t').values).astype(float)
 
             data = np.concatenate([data1, data2], 0)
@@ -401,7 +404,7 @@ class NYTaxiTimePrediction(NYTaxiBase):
     # N, D = 9741, 6
 
     def read_data(self):
-        path = os.path.join(DATA_PATH, 'taxitime_preprocessed.npz')
+        path = os.path.join(self.dataset_path, 'taxitime_preprocessed.npz')
         if os.path.isfile(path):
             with open(path, 'rb') as file:
                 f = np.load(file)
@@ -427,7 +430,7 @@ class NYTaxiTimePrediction(NYTaxiBase):
 class NYTaxiLocationPrediction(NYTaxiBase):
     N, D = 1420068, 6
     def read_data(self):
-        path = os.path.join(DATA_PATH, 'taxiloc_preprocessed.npz')
+        path = os.path.join(self.dataset_path, 'taxiloc_preprocessed.npz')
         if os.path.isfile(path):
             with open(path, 'rb') as file:
                 f = np.load(file)
@@ -457,10 +460,15 @@ class NYTaxiLocationPrediction(NYTaxiBase):
 # Andrew Wilson's datasets
 #https://drive.google.com/open?id=0BxWe_IuTnMFcYXhxdUNwRHBKTlU
 class WilsonDataset(Dataset):
+
     @property
     def datapath(self):
         n = self.name[len('wilson_'):]
-        return '{}/uci/{}/{}.mat'.format(DATA_PATH, n, n)
+        return '{}/{}/{}.mat'.format(self.dataset_path, n, n)
+    
+    @property
+    def url(self):
+        return self.datapath
 
     def read_data(self):
         data = loadmat(self.datapath)['data']
@@ -816,7 +824,7 @@ class MujocoSoftActorCriticDataset(Dataset):
 
     @property
     def datadir(self):
-        dir = os.path.join(DATA_PATH, self.name)
+        dir = os.path.join(self.dataset_path, self.name)
         return dir
 
     @property

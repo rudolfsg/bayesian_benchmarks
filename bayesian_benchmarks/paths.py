@@ -16,7 +16,7 @@ def expand_to_absolute(path):
     else:
         return path
 
-DATA_PATH = "./datasets" #expand_to_absolute(cfg['paths']['data_path'])
+DATA_PATH = expand_to_absolute(cfg['paths']['data_path'])
 BASE_SEED = int(cfg['seeds']['seed'])
 RESULTS_DB_PATH = expand_to_absolute(cfg['paths']['results_path'])
 
