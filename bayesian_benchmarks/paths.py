@@ -17,7 +17,7 @@ def expand_to_absolute(path):
         return path
 
 DATA_PATH = expand_to_absolute(cfg['paths']['data_path'])
-BASE_SEED = int(cfg['seeds']['seed'])
+# BASE_SEED = int(cfg['seeds']['seed'])
 RESULTS_DB_PATH = expand_to_absolute(cfg['paths']['results_path'])
 
 if not os.path.isdir(DATA_PATH):

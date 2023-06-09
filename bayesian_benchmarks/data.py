@@ -25,7 +25,7 @@ from urllib.request import urlopen
 logging.getLogger().setLevel(logging.INFO)
 import zipfile
 
-from bayesian_benchmarks.paths import DATA_PATH, BASE_SEED
+from bayesian_benchmarks.paths import DATA_PATH#, BASE_SEED
 
 _ALL_REGRESSION_DATATSETS = {}
 _ALL_CLASSIFICATION_DATATSETS = {}
@@ -58,7 +58,7 @@ class Dataset(object):
 
         ind = np.arange(self.N)
 
-        np.random.seed(BASE_SEED + split)
+        # np.random.seed(BASE_SEED + split)
         np.random.shuffle(ind)
 
         n = int(self.N * prop)
